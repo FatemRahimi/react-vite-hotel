@@ -1,33 +1,53 @@
-// import React from "react";
-// import TouristInfoCards from "./touristInfocards/TouristInfoCards";
-// import Bookings from "./Bookings";
-// import Restaurant from "./restaurant/Restaurant";
+import React, { useState, useEffect } from "react";
+import Search from "./search/Search.js";
+import SearchResults, { TableHeader } from "./search/SearchResults.js";
 
-// function Admin() {
-//   return (
-//     <div>
-//       <TouristInfoCards />
-//       <Bookings />
-//       <Restaurant />
-//     </div>
-//   );
-// }
+const Bookings = () => {
+  const [bookings, SetBooking] = useState([]);
+  const [initialData, SetInitialData] = useState([]);
 
-// export default Admin;
+  const [status, setStatus] = useState("fetching");
 
-import React from "react";
-import TouristInfoCards from "./touristInfocards/TouristInfoCards";
-import Bookings from "./Bookings";
-import Restaurant from "./restaurant/Restaurant";
+  const search = searchVal => {
+    console.info("TO DO!", searchVal);
+    SetBooking(
+      initialData.filter(
+        value =>
+          value.firstName.toLowerCase().includes(searchVal.toLowerCase()) ||
+          value.surname.toLowerCase().includes(searchVal.toLowerCase())
+      )
+    );
+    return initialData;
+  };
+  useEffect(() => {
+    fetch(`https://teniolao-cyf-hotel-server.glitch.me/bookings`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          setStatus("loading failed");
+        }
+        SetInitialData(data);
+        SetBooking(data);
+        setStatus("success");
+      });
+  }, []);
 
-function Admin() {
   return (
-    <div>
-      <TouristInfoCards />
-      <Bookings />
-      <Restaurant />
+    <div className="wrapper">
+      <div className="App-content">
+        <div className="container">
+          {status === "fetching" && "Loading Please wait..."}
+          {status === "success" && (
+            <>
+              <Search search={search} />
+              <SearchResults bookings={bookings} />
+            </>
+          )}
+          {status === "failure" && "SORRY Something went wrong"}
+        </div>
+      </div>
     </div>
   );
-}
+};
 
-export default Admin;
+export default Bookings;
